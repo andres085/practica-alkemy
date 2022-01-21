@@ -22,5 +22,5 @@ sequelize.sync({ force: false })
 module.exports = {
   Character,
   Movie,
-  Genre
+  Genre, 
 }
