@@ -1,14 +1,26 @@
-module.exports = {
+const Sequelize = require('sequelize');
+
+const CharacterModel = require('../models/character');
+const MovieModel = require('../models/movie');
+const GenreModel = require('../models/genre');
+
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
   HOST: process.env.DB_HOST,
-  USER: process.env.DB_USER,
-  PASSWORD: process.env.DB_PASSWORD,
-  DB: process.env.DB_NAME,
   port: process.env.DB_PORT,
   dialect: "mysql",
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  }
-};
+});
+
+const Character = CharacterModel(sequelize, Sequelize);
+const Movie = MovieModel(sequelize, Sequelize);
+const Genre = GenreModel(sequelize, Sequelize);
+
+sequelize.sync({ force: false })
+  .then(() => {
+    console.log('Tablas Sincronizadas');
+  }).catch((err) => { console.log('Error', err) });
+
+module.exports = {
+  Character,
+  Movie,
+  Genre
+}
