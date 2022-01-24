@@ -7,5 +7,5 @@ module.exports = (sequelize, type) => {
         },
         name: type.STRING,
         image: type.STRING,
-    })
+    });
 }

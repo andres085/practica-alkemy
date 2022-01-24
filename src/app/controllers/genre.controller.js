@@ -33,7 +33,7 @@ exports.getOne = (req, res) => {
 
     let id = req.params.id;
 
-    Genre.findByPk(id)
+    Genre.findByPk(id, {include: 'movies'})
         .then(data => {
             data ? res.send(data) : res.status(404).send({
                 message: `Cannot find genre with id ${id}` 

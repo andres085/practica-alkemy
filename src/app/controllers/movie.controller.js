@@ -25,7 +25,7 @@ exports.get = (req, res) => {
 
     Movie.findAll({
         where: condition,
-        attributes: {exclude: ['id', 'rate', 'createdAt', 'updatedAt']},
+        attributes: {exclude: ['id', 'rate', 'createdAt', 'updatedAt', 'genreId']},
         })
         .then(data => {
             res.send(data);

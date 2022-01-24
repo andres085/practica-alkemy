@@ -14,6 +14,8 @@ const Character = CharacterModel(sequelize, Sequelize);
 const Movie = MovieModel(sequelize, Sequelize);
 const Genre = GenreModel(sequelize, Sequelize);
 
+Genre.hasMany(Movie);
+
 sequelize.sync({ force: false })
   .then(() => {
     console.log('Tablas Sincronizadas');

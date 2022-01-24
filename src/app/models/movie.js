@@ -8,6 +8,6 @@ module.exports = (sequelize, type) => {
         image: type.STRING,
         title: type.STRING,
         creation_date: type.DATE,
-        rate: type.INTEGER,
+        rate: type.INTEGER
     })
 }
