@@ -19,12 +19,13 @@ exports.create = (req, res) => {
 exports.get = (req, res) => {
     const name = req.query.name;
     const age = req.query.age;
+    // const movieId = req.query.movieId;
 
     let condition = name ? { name: { [Op.like]: `%${name}%` } } : age ? { age: { [Op.like]: `%${age}%` } } : null;
-
+    
     Character.findAll({
-        where: condition,
         include: 'movies',
+        where: condition,
         attributes: {exclude: ['id', 'age', 'weight', 'story', 'createdAt', 'updatedAt']},
         })
         .then(data => {

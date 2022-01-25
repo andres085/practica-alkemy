@@ -20,13 +20,20 @@ exports.get = (req, res) => {
 
     const title = req.query.title;
     const genre = req.query.genre;
+    const order = req.query.order;
 
-    let condition = title ? { title: { [Op.like]: `%${title}%` } } : genre ? { genre: { [Op.like]: `%${genre}%` } } : null;
+    let condition = title ? { title: { [Op.like]: `%${title}%` } } : genre ? { genreId: { [Op.like]: `%${genre}%` } } : null;
+    let orderBy = order ? ['creation_date', order] : ['id', 'ASC']; 
+
+    console.log(orderBy);
 
     Movie.findAll({
         where: condition,
         include: 'characters',
-        attributes: {exclude: ['id', 'rate', 'createdAt', 'updatedAt', 'genreId']},
+        attributes: { exclude: ['id', 'rate', 'createdAt', 'updatedAt', 'genreId'] },
+        order: [
+            orderBy
+        ] 
         })
         .then(data => {
             res.send(data);
