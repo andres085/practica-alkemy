@@ -24,6 +24,7 @@ exports.get = (req, res) => {
 
     Character.findAll({
         where: condition,
+        include: 'movies',
         attributes: {exclude: ['id', 'age', 'weight', 'story', 'createdAt', 'updatedAt']},
         })
         .then(data => {
@@ -40,7 +41,7 @@ exports.getOne = (req, res) => {
 
     let id = req.params.id;
 
-    Character.findByPk(id)
+    Character.findByPk(id, {include: 'movies'})
         .then(data => {
             data ? res.send(data) : res.status(404).send({
                 message: `Cannot find character with id ${id}` 

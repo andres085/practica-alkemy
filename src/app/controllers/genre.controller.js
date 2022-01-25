@@ -1,7 +1,4 @@
-const Sequelize = require('sequelize');
 const { Genre } = require('../config/db.config');
-const Op = Sequelize.Op;
-
 
 exports.create = (req, res) => {
     
@@ -18,7 +15,7 @@ exports.create = (req, res) => {
 
 exports.get = (req, res) => {
 
-    Genre.findAll()
+    Genre.findAll({include: 'movies'})
         .then(data => {
             res.send(data);
         })

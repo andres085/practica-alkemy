@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const { Movie } = require('../config/db.config');
+const { Movie, CharacterMovie } = require('../config/db.config');
 const Op = Sequelize.Op;
 
 
@@ -25,6 +25,7 @@ exports.get = (req, res) => {
 
     Movie.findAll({
         where: condition,
+        include: 'characters',
         attributes: {exclude: ['id', 'rate', 'createdAt', 'updatedAt', 'genreId']},
         })
         .then(data => {
@@ -41,7 +42,7 @@ exports.getOne = (req, res) => {
 
     let id = req.params.id;
 
-    Movie.findByPk(id)
+    Movie.findByPk(id, {include: 'characters'})
         .then(data => {
             data ? res.send(data) : res.status(404).send({
                 message: `Cannot find movie with id ${id}` 
