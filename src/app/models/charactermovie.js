@@ -11,5 +11,5 @@ module.exports = (sequelize, type) => {
         movieId: {
             type: type.INTEGER,
         },
-    })
+    });
 }

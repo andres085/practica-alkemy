@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const { Movie, CharacterMovie } = require('../config/db.config');
+const { Movie } = require('../config/db.config');
 const Op = Sequelize.Op;
 
 
@@ -33,7 +33,7 @@ exports.get = (req, res) => {
         attributes: { exclude: ['id', 'rate', 'createdAt', 'updatedAt', 'genreId'] },
         order: [
             orderBy
-        ] 
+        ],
         })
         .then(data => {
             res.send(data);

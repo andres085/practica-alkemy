@@ -26,7 +26,7 @@ exports.get = (req, res) => {
     Character.findAll({
         include: 'movies',
         where: condition,
-        attributes: {exclude: ['id', 'age', 'weight', 'story', 'createdAt', 'updatedAt']},
+        attributes: { exclude: ['id', 'age', 'weight', 'story', 'createdAt', 'updatedAt'] },
         })
         .then(data => {
             res.send(data);
