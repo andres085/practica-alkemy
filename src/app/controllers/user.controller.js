@@ -59,5 +59,5 @@ const createToken = (user) => {
         email: user.email
     }
 
-    return jwt.encode(payload, 'secret');
+    return jwt.encode(payload, process.env.SECRET);
 }
