@@ -4,14 +4,18 @@ const Op = Sequelize.Op;
 
 
 exports.create = (req, res) => {
+
+    if (!req.body.name) {
+        res.status(400).send({ error: 'Character name its needed to create one' });
+    }
     
     Character.create(req.body)
         .then(data => {
-            res.send(data);
+            res.status(200).send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message
+                message: 'Something went wrong when trying to create a character'
             })
         })
 }
@@ -29,7 +33,7 @@ exports.get = async (req, res) => {
                 attributes: ['image', 'name']
             });
          
-            characterFound.length !== 0 ? res.status(200).send(characterFound) : res.status(404).send({ error: 'Error character not found' }) 
+            characterFound.length !== 0 ? res.status(200).send(characterFound) : res.status(404).send({ error: 'Character not found' }) 
 
         }
         if (age) {
@@ -38,7 +42,7 @@ exports.get = async (req, res) => {
                 attributes: ['image', 'name'],
             });
          
-            characterFound.length !== 0 ? res.status(200).send(characterFound) : res.status(404).send({ error: 'Error character not found' }) 
+            characterFound.length !== 0 ? res.status(200).send(characterFound) : res.status(404).send({ error: 'Character not found' }) 
         }
         if (movies) {
             const characterFound = await Character.findAll({
@@ -54,7 +58,7 @@ exports.get = async (req, res) => {
                 }
             });
 
-            characterFound.length !== 0 ? res.status(200).send(characterFound) : res.status(404).send({ error: 'Error character not found' }) 
+            characterFound.length !== 0 ? res.status(200).send(characterFound) : res.status(404).send({ error: 'Character not found' }) 
         } else {
 
             const characters = await Character.findAll({

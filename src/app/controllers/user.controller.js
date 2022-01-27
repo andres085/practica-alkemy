@@ -1,22 +1,26 @@
 const { User } = require('../config/db.config');
 const bcrypt = require('bcryptjs');
-const jwt = require('jwt-simple');
+const createToken = require('../utils/CreateToken');
 const sendEmail = require('../utils/SendGridHelper');
 
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
+
+    if (!req.body.username || !req.body.password) {
+        res.status(400).send({ error: 'Username and password its needed to create an account' });
+    }
 
     req.body.password = bcrypt.hashSync(req.body.password, 10);
-    
-    User.create(req.body)
-        .then(data => {
+
+    try {
+        const newUser = await User.create(req.body);
             sendEmail(req.body.email);
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message
-            });
-        });
+            res.status(200).send({message: 'User registered successfully'});
+
+    } catch (error) {
+         res.status(500).send({
+                message: 'Something went wrong when trying to create an account'
+            })
+    }
 }
 
 exports.get = (req, res) => {
@@ -27,39 +31,29 @@ exports.get = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: 'Error retrieving movies'
+                message: 'Error retrieving users'
             });
         });
 }
 
-exports.login = (req, res) => {
-    
-    User.findOne({ where: { email: req.body.email } })
-        .then(user => {
-            if (user) {
+exports.login = async (req, res) => {
 
-                const comparePassword = bcrypt.compareSync(req.body.password, user.password);
-                comparePassword ? res.send({ token: createToken(user) }) : res.status(403).send({ message: 'Wrong username or password' });
-                
-            } else {
-                res.status(404).send({
+    try {
+        const foundUser = await User.findOne({ where: { email: req.body.email } });
+
+        if (!foundUser) {
+
+           return res.status(404).send({
                     message: `User not found`
                 });
-            }
-        })
-        .catch(err => {
-            res.status(500).send({
+        } 
+        
+        const comparePassword = bcrypt.compareSync(req.body.password, foundUser.password);
+        comparePassword ? res.send({ token: createToken(foundUser) }) : res.status(403).send({ message: 'Wrong username or password' });
+        
+    } catch (error) {
+        res.status(500).send({
                 message: `Error getting user`
             });
-        });
-    
-}
-
-const createToken = (user) => {
-    const payload = {
-        userId: user.id,
-        email: user.email
     }
-
-    return jwt.encode(payload, process.env.SECRET);
 }

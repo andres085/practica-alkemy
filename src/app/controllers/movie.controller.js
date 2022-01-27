@@ -1,115 +1,144 @@
 const Sequelize = require('sequelize');
-const { Movie } = require('../config/db.config');
+const { Movie, Character } = require('../config/db.config');
 const Op = Sequelize.Op;
 
 
-exports.create = (req, res) => {
-    
-    Movie.create(req.body)
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message
+exports.create = async (req, res) => {
+
+    if (!req.body.title) {
+        return res.status(400).send({ error: 'Movie title its needed to create one' });
+    }
+    try {
+        const newMovie = await Movie.create(req.body);
+            res.status(200).send(newMovie);
+
+    } catch (error) {
+         res.status(500).send({
+                message: 'Something went wrong when trying to create a movie'
             })
-        })
+    }
 }
 
-exports.get = (req, res) => {
+exports.get = async (req, res) => {
 
     const title = req.query.title;
     const genre = req.query.genre;
     const order = req.query.order;
 
-    let condition = title ? { title: { [Op.like]: `%${title}%` } } : genre ? { genreId: { [Op.like]: `%${genre}%` } } : null;
     let orderBy = order ? ['creation_date', order] : ['id', 'ASC']; 
 
-    console.log(orderBy);
+    try {
+        if (title) {
+            const moviesFound = await Movie.findAll({
+                where: {title},
+                attributes: ['title', 'image', 'creation_date'],
+                order: [
+                    orderBy
+                ],
+            });
 
-    Movie.findAll({
-        where: condition,
-        include: 'characters',
-        attributes: { exclude: ['id', 'rate', 'createdAt', 'updatedAt', 'genreId'] },
-        order: [
-            orderBy
-        ],
-        })
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
+            moviesFound.length !== 0 ? res.status(200).send(moviesFound) : res.status(404).send({ error: 'Movies not found' }) 
+
+        }
+        if (genre) {
+            const moviesFound = await Movie.findAll({
+                where: {genreId: genre},
+                attributes: ['title', 'image', 'creation_date'],
+                order: [
+                    orderBy
+                ],
+            });
+
+            moviesFound.length !== 0 ? res.status(200).send(moviesFound) : res.status(404).send({ error: 'Movies not found' }) 
+
+        } else {
+            const moviesFound = await Movie.findAll({
+                attributes: ['title', 'image', 'creation_date'],
+                order: [
+                    orderBy
+                ],
+            });
+            moviesFound.length !== 0 ? res.status(200).send(moviesFound) : res.status(404).send({ error: 'Movies not found' }) 
+        }   
+    
+        
+    } catch (error) {
+         res.status(500).send({
                 message: 'Error retrieving movies'
             })
-        })
+    }
 }
 
-exports.getOne = (req, res) => {
+exports.getOne = async(req, res) => {
 
     let id = req.params.id;
 
-    Movie.findByPk(id, {include: 'characters'})
-        .then(data => {
-            data ? res.send(data) : res.status(404).send({
-                message: `Cannot find movie with id ${id}` 
-            })
+    try {
+
+        const movieFound = await Movie.findByPk(id, {
+            attributes: ['title', 'image', 'creation_date'],
+            include: {
+                    model: Character,
+                    as: 'characters',
+                    through: {
+                        attributes: []
+                    },
+                    attributes: ['image', 'name' ]
+                }
         })
-        .catch(err => {
-            res.status(500).send({
-                message: `Error getting movie with id ${id}`
+        
+        movieFound ? res.status(200).send(movieFound) : res.status(404).send({ error: 'Movie not found' });
+        
+    } catch (error) {
+         res.status(500).send({
+                message: 'Error retrieving movie'
             })
-        })
+    }
 
 }
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
 
     let id = req.params.id;
 
-    Movie.update(req.body, {
-            where: {
-                id: id
-            }
-        })
-        .then(data => {
-            if (data == 1) {
-                res.send({
-                    message: `Movie with id ${id} updated successfully`
-                })
-            } else {
-                res.send({
-                    message: `Cannot update movie with id ${id}, not found or body it's empty`
-                })
-            }
-        })
-        .catch(err => {
-             res.status(500).send({
-                message: `Error updating movie with id ${id}`
+    try {
+        const movieFound = await Movie.findByPk(id);
+
+        if (movieFound) {
+
+            movieFound.update(req.body);
+
+            res.status(200).send({ message: `Movie with id ${id} updated successfully` })
+        } else {
+            return res.status(404).send({ message: `Cannot find movie with id ${id}`});
+        }
+
+    } catch (error) {
+          res.status(500).send({
+                message: `Error updating movie`
             })
-        })
+    }
 }
 
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
 
     let id = req.params.id;
 
-    Movie.destroy({
-        where: {id: id}
-    }).then(data => {
-            if (data == 1) {
-                res.send({
-                    message: `Movie with id ${id} deleted successfully`
-                })
-            } else {
-                res.send({
-                    message: `Cannot delete movie with id ${id}, not found`
-                })
-            }
-        })
-        .catch(err => {
-             res.status(500).send({
-                message: `Error deleting movie with id ${id}`
+    try {
+        const foundMovie = await Movie.findByPk(id);
+
+        if (foundMovie) {
+            
+            foundMovie.destroy();
+
+            res.status(200).send({ message: `Movie with id ${id} deleted successfully` })
+        } else {
+            return res.status(404).send({ message: `Cannot find movie with id ${id}`});
+        }
+
+    } catch (error) {
+          res.status(500).send({
+                message: `Error deleting movie`
             })
-        })
+    }
 }
