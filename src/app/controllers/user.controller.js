@@ -1,6 +1,7 @@
 const { User } = require('../config/db.config');
 const bcrypt = require('bcryptjs');
 const jwt = require('jwt-simple');
+const sendEmail = require('../utils/SendGridHelper');
 
 exports.create = (req, res) => {
 
@@ -8,6 +9,7 @@ exports.create = (req, res) => {
     
     User.create(req.body)
         .then(data => {
+            sendEmail(req.body.email);
             res.send(data);
         })
         .catch(err => {
